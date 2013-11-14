@@ -3,40 +3,35 @@
 \alias{cost_benefit_breakeven}
 \docType{package}
 \title{
-What the package does (short line)
-~~ package title ~~
+Exploration of breakeven points for cost-benefit analysis
 }
 \description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
-}
+Interactive interface to identify univariate, bivariate and multivariate breakeven points}
 \details{
 \tabular{ll}{
 Package: \tab cost_benefit_breakeven\cr
 Type: \tab Package\cr
 Version: \tab 1.0\cr
 Date: \tab 2013-11-14\cr
-License: \tab What license is it under?\cr
+License: \tab GPL-3\cr
 }
-~~ An overview of how to use the package, including the most important ~~
-~~ functions ~~
+
+Load a data.frame specifying ranges of values to explore (See \code{\link{ranges}})
+Use \code{runShiny()} to show interface.
+
+Alternatively, use \code{\link{univariate.breakeven}}, \code{\link{bivariate.breakeven}} directly.
 }
 \author{
-Who wrote it
-
-Maintainer: Who to complain to <yourfault@somewhere.net>
-~~ The author and/or maintainer of the package ~~
+Joseph Guillaume <joseph.guillaume@gmail.com>
 }
 \references{
 ~~ Literature or other references for background information ~~
 }
-~~ Optionally other standard keywords, one per line, from file KEYWORDS in ~~
-~~ the R documentation directory ~~
 \keyword{ package }
 \seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
+\code{\link{runShiny}}
 }
 \examples{
-~~ simple examples of the most important functions ~~
+data(ranges)
+runShiny()
 }

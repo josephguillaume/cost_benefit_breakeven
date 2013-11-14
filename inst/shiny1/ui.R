@@ -1,5 +1,5 @@
 library(shiny)
-source("tableinput.R")
+library(cost.benefit.breakeven)
 shinyUI(bootstrapPage(
                       headerPanel('Break-even analysis',
                                   singleton(

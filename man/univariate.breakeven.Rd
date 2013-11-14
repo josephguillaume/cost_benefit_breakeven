@@ -36,6 +36,6 @@ Joseph Guillaume
 \code{\link{runShiny}} for web interface
 }
 \examples{
-load(ranges)
+data(ranges)
 univariate.breakeven(ranges,"basin","base")
 }

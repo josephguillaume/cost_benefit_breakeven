@@ -10,7 +10,7 @@
 matrixInput <- function(inputId, label, data,types=NULL) {
   addResourcePath(
     prefix='tableinput',
-    directoryPath=system.file("shiny1", package = "cost_benefit_breakeven"))
+    directoryPath=system.file("shiny1", package = "cost.benefit.breakeven"))
 
   if(is.null(types)) {
       type.lookup <- c("double"="numeric","integer"="integer",

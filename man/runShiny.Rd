@@ -24,6 +24,6 @@ runShiny(...)
 Joseph Guillaume
 }
 \examples{
-load(ranges)
+data(ranges)
 runShiny()
 }

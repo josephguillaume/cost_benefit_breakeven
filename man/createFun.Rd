@@ -33,7 +33,7 @@ variables in ranges$Variable and returns \code{NPV(scen)-NPV(baseline)}
 Joseph Guillaume
 }
 \examples{
-load(ranges)
+data(ranges)
 diff.NPV<-createFun("basin","base",ranges[1:2,])
 diff.NPV(c(25,200))
 }

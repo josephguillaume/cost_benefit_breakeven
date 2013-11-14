@@ -2,7 +2,7 @@
 \alias{ranges}
 \docType{data}
 \title{
-%%   ~~ data name/kind ... ~~
+Example set of ranges used for breakeven analysis
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of the dataset. ~~
@@ -30,8 +30,11 @@
 \references{
 %%  ~~ possibly secondary sources and usages ~~
 }
+\seealso{
+  \code{\link{runShiny}}
+}
 \examples{
 data(ranges)
-## maybe str(ranges) ; plot(ranges) ...
+ranges
 }
 \keyword{datasets}

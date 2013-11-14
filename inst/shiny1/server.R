@@ -1,5 +1,6 @@
 library(shiny)
 library(hydromad) ##SCEoptim
+library(cost.benefit.breakeven)
 
 radioButtonsTable <-
 function (inputId, label, data,choices,selected=NULL)
@@ -136,12 +137,13 @@ shinyServer(function(input, output, session) {
     ## })
 
     uni.bkevenf <- reactive({
-        input$scen
-        input$baseline
-        uni.bkeven <- univariate.breakeven(ranges,
-                                           input$scen,input$baseline)
-        uni.bkeven$"break" <- round(uni.bkeven$"break",2)
-        uni.bkeven
+      update.ranges()
+      input$scen
+      input$baseline
+      uni.bkeven <- univariate.breakeven(ranges,
+                                         input$scen,input$baseline)
+      uni.bkeven$"break" <- round(uni.bkeven$"break",2)
+      uni.bkeven
     })
 
     output$uni_plot_variable<- renderUI({
@@ -214,28 +216,8 @@ shinyServer(function(input, output, session) {
       ranges.new$Variable[ranges.new$Variable==""] <- NA
       ranges.new <- ranges.new[!apply(ranges.new,1,function(x) all(is.na(x))),,drop=FALSE]
       if(nrow(ranges.new)>0) ranges <<- ranges.new
-      TRUE
+      ranges
     })
-
-    ## output$more_sliders <- renderUI({
-    ##   ## TODO: show modeled value and breakeven value on slider
-    ##   sliders <- lapply(1:nrow(ranges0),function(i) {
-    ##     div(ranges0$Modeled[i],
-    ##         sliderInput(sprintf("more_slider_%s",ranges0$Variable[i]),ranges0$Variable[i],min=ranges0$Min[i],max=ranges0$Max[i],value=ranges0$Modeled[i])
-    ##         )
-    ##   })
-    ##   do.call(div,sliders)
-    ## })
-
-
-  ##   output$more_results <- renderTable({
-  ##     limit.val <- sapply(ranges0$Variable,function(v) input[[sprintf("more_slider_%s",v)]])
-  ##     print(limit.val)
-  ##     dist <- apply(pom0,1,function(x) sum((abs(x-start.pos)/abs(limit.val-start.pos))^2))
-  ##     cbind(df[,c("Variable","Min","Max","break.","Modeled")],limit.val,
-  ##           pmin(limit.val,start.pos),pmax(limit.val,start.pos),
-  ##           pom0[which.min(dist),])
-  ## })
 
     output$more_results <- renderTable({
         input$more_update

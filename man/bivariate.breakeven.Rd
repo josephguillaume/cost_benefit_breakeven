@@ -44,6 +44,6 @@ Joseph Guillaume
 \code{\link{runShiny}} for web interface
 }
 \examples{
-load(ranges)
+data(ranges)
 bivariate.breakeven(ranges, "basin", "base", n = 10)
 }
