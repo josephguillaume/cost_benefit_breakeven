@@ -229,22 +229,6 @@ shinyServer(function(input, output, session) {
         limit.val <- sapply(c(active_vars,breakeven_factor),function(v) isolate(input[[sprintf("more_slider_%s",v)]]))
         print(limit.val)
         start.pos <- ranges$Modeled[which.all]
-        ##if(any(limit.val[1,]==start.pos)|any(limit.val[2,]==start.pos)) stop("Limit values cannot be equal to modeled value")
-        ## Initial value
-        netdiff <- createFun(isolate(input$scen),
-                             isolate(input$baseline),
-                             ranges[which.all,])
-        ## ## Initial feasible point
-        ## i <- 3
-        ## init <- uniroot(function(x) {
-        ##     pos <- start.pos
-        ##     pos[i] <- x
-        ##     netdiff(pos)
-        ## },interval=c(ranges$Min[i],ranges$Max[i]))$root
-        ## ## TODO: catch error and iterate until find one
-        ## init.pos <- start.pos
-        ## init.pos[i] <- init
-        ## ##netdiff(init.pos)
 
         ## Optimise
         net.environmental.cost <- createFun(isolate(input$scen),
@@ -265,14 +249,8 @@ shinyServer(function(input, output, session) {
         f <- function(x){
             tryCatch(y <- net.environmental.cost(x),error=function(e) browser())
             x <- c(x,y)
-            ##normalised <- abs(x-start.pos)/abs(limit.val-start.pos)
-            ##print(normalised)
             ##updateTextInput(session,"more_status",as.character(max(get.normalised(x)))) ##TODO: doesn't seem to work?
             max(get.normalised(x))
-            ##TODO: would prefer Inf, but SCEoptim can't deal with it?
-            ## Can't use barrier function with non-gradient-based technique, e.g. stochasticity of SCEoptim -> end up just at Inf
-            ##ifelse(tail(normalised,1)<1,-log(1-tail(normalised,1)),1e10) ##barrier function
-            ##max((ifelse((x-start.pos)*minmax>0,x-start.pos,0)/abs(limit.val-start.pos))
         }
 
         if(require("compiler")){
@@ -281,17 +259,9 @@ shinyServer(function(input, output, session) {
           f <- cmpfun(f)
         }
 
-        ## init.val <- f(init.pos[1:4])
-        ## ##browser()
-        ## if(init.val>1) {
-        ##     stop(sprintf("Initial solution infeasible (init.val %f)",init.val))
-        ## }
         ##FIXME poorly identified solution, significant parameter interactions, weak sensitivity, very small part of parameter space
-        ##  TODO: choose pars with weaker cor and see if it works
-        ## opt <- optim(init.pos[1:4],f,method="L-BFGS-B",
-        ##              lower=pmin(limit.val[1:4],start.pos[1:4])*0.99,
-        ##              upper=pmax(limit.val[1:4],start.pos[1:4])*1.01
-        ##              )
+        ## optim L-BFGS-B fails
+        ## Can't use barrier function with non-gradient-based technique, e.g. stochasticity of SCEoptim -> end up just at Inf
         st <- proc.time()
         opt <- SCEoptim(f,ranges$Modeled[which.active],##init.pos,
                         ##lower=pmin(limit.val[1:4],start.pos[1:4])*0.99,
