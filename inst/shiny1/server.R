@@ -231,12 +231,12 @@ shinyServer(function(input, output, session) {
         start.pos <- ranges$Modeled[which.all]
 
         ## Optimise
-        net.environmental.cost <- createFun(isolate(input$scen),
-                                            isolate(input$baseline),
-                                            ranges[which.active,],
-                                            fixed.vals=list(breakeven.factor=sprintf("'%s'",breakeven_factor))
-                                            )
-       
+        net.environmental.cost <-
+            createBreakevenFun(isolate(input$scen),
+                               isolate(input$baseline),
+                               "net.environmental.cost",
+                               ranges[which.active,])
+
         get.normalised <- function(x)
             ifelse(abs(x-start.pos)<1e-5,0,
                    ifelse(x>start.pos,
