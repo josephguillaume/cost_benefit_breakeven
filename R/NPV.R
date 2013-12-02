@@ -65,7 +65,8 @@ asr.treatment.cost.per.ml=70,
 asr.maintenance.rate=0.03,
 
 net.environmental.cost=0,
-                breakeven.factor=NA
+                breakeven.factor=NA,
+         state.var=NA
 
 ){
 
@@ -173,8 +174,12 @@ annual.cash.flow=benefit-cost
 ## print(annual.cash.flow)
 ## }
 
-##TODO: account for non-zero net.environmental.cost
-if(!is.na(breakeven.factor) && breakeven.factor=="net.environmental.cost") return(annual.cash.flow)
+## Single scenario breakeven, i.e. obtain NPV of zero
+if(!is.na(breakeven.factor) && breakeven.factor=="net.environmental.cost") return(net.environmental.cost+annual.cash.flow)
+if(!is.na(breakeven.factor) && breakeven.factor=="pump.cost.dollar.per.ml") return(pump.cost.dollar.per.ml+annual.cash.flow/pump.vol.ml)
+
+## TODO: allow requesting more than one state variable
+if(!is.na(state.var)) return(get(state.var))
 
 years.discount.rate <- 1/(1 + discount.rate)^(1:nyears)
 sum(annual.cash.flow * years.discount.rate)
