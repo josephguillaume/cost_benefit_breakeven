@@ -1,4 +1,5 @@
 createBreakevenFun <- function(scen,baseline,breakeven.factor,ranges,fixed.vals=NULL){
+    stopifnot(breakeven.factor %in% c("net.environmental.cost","pump.cost.dollar.per.ml"))
     pars <- getDefaultPars(NPV)
     for(v in ranges$Variable) {
         if(is.null(eval(parse(text=sprintf("pars$%s",v))))) stop(sprintf("Parameter %s not recognised",v))
@@ -13,13 +14,14 @@ createBreakevenFun <- function(scen,baseline,breakeven.factor,ranges,fixed.vals=
             x<-as.numeric(x)
             pars <- getDefaultPars(NPV)
             %s
+            pars$state.var='annual.cash.flow'
             pars$scen='%s'
             %s
             annual1=do.call(NPV,pars)
             pars$scen='%s'
             annual2=do.call(NPV,pars)
             delta=annual1-annual2
-            return(net.environmental.cost+delta)
+            return(pars$net.environmental.cost+delta)
         }",fixed.vals2,scen,settings,baseline))))
     }
     if(breakeven.factor=="pump.cost.dollar.per.ml"){
@@ -30,17 +32,17 @@ createBreakevenFun <- function(scen,baseline,breakeven.factor,ranges,fixed.vals=
             %s
             pars$scen='%s'
             %s
-            pars$state.var=NA
+            pars$state.var='annual.cash.flow'
             annual1=do.call(NPV,pars)
-            pars$state.var='\"pump.vol.ml\"'
+            pars$state.var='pump.vol.ml'
             pumpvol1=do.call(NPV,pars)
             pars$scen='%s'
-            pars$state.var=NA
+            pars$state.var='annual.cash.flow'
             annual2=do.call(NPV,pars)
-            pars$state.var='\"pump.vol.ml\"'
+            pars$state.var='pump.vol.ml'
             pumpvol2=do.call(NPV,pars)
             delta=-(annual1-annual2)/(pumpvol2-pumpvol1)
-            return(pump.cost.dollar.per.ml+delta)
+            return(pars$pump.cost.dollar.per.ml+delta)
         }",fixed.vals2,scen,settings,baseline))))
     }##pump.cost.dollar.per.ml
 }## createBreakevenFun
