@@ -83,18 +83,21 @@ $('#more_toggle_all').on('click',function(evt){
                                                          ticks[frac[1]+1] <- ranges$Modeled[i]
                                                          ##ticks[1] <- ranges$Min[i]
                                                          ##ticks[length(ticks)] <- ranges$Max[i]
-                                                         if(ranges$Variable[i]=="net.environmental.cost"){
-                                                             check <- ""
+                                                         if(ranges$Variable[i] %in% c("net.environmental.cost","pump.cost.dollar.per.ml")){
+                                                             radio <- tags$input(type="radio",name="more_bkeven",
+                                                                                 id=paste("more_bkeven", i, sep = ""), value = ranges$Variable[i])
                                                          } else {
-                                                             check <- tags$input(type = "checkbox", name = "more",
-                                                                                 id = paste("more", i, sep = ""), value = ranges$Variable[i])
+                                                             radio <- ""
                                                          }
+                                                         check <- tags$input(type = "checkbox", name = "more",
+                                                                                 id = paste("more", i, sep = ""), value = ranges$Variable[i])
                                                          div(
                                                              ##ranges$Modeled[i],
                                                              ## TODO: show modeled value and breakeven value on slider?
                                                              ## TODO: select which vars to use and which to calculate
                                                              ## TODO: update when ranges change - can't use updateSliderInput
                                                              check,
+                                                             radio,
                                                              sliderInput(sprintf("more_slider_%s",ranges$Variable[i]),ranges$Variable[i],
                                                                          min=ranges$Min[i],max=ranges$Max[i],
                                                                          value=c(ranges$Min[i],ranges$Max[i]),

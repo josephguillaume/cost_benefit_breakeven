@@ -223,7 +223,10 @@ shinyServer(function(input, output, session) {
         input$more_update
         active_vars <- isolate(input$more)
         if(length(active_vars)==0) stop("Select variables to use")
-        breakeven_factor="net.environmental.cost"
+        breakeven_factor <- isolate(input$more_bkeven)
+        cat("Breakeven factor: ",breakeven_factor,"\n",sep="",file=stderr())
+        active_vars<- setdiff(active_vars,breakeven_factor)
+        cat("Other factors:",active_vars,"\n",sep=" ",file=stderr())
         which.all <- match(c(active_vars,breakeven_factor),ranges$Variable)
         which.active <- match(active_vars,ranges$Variable)
         limit.val <- sapply(c(active_vars,breakeven_factor),function(v) isolate(input[[sprintf("more_slider_%s",v)]]))
@@ -234,7 +237,7 @@ shinyServer(function(input, output, session) {
         net.environmental.cost <-
             createBreakevenFun(isolate(input$scen),
                                isolate(input$baseline),
-                               "net.environmental.cost",
+                               breakeven_factor,
                                ranges[which.active,])
 
         get.normalised <- function(x)
