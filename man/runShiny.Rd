@@ -7,11 +7,14 @@ Run Shiny Web interface
 Web interface for univariate, bivariate and multivariate breakeven analysis
 }
 \usage{
-runShiny(...)
+runShiny(...,name="shiny_perctolimit")
 }
 \arguments{
   \item{\dots}{
     Arguments to pass to \code{\link{runApp}}
+}
+  \item{\name}{
+    User interface to use: \code{shiny1} or \code{shiny_perctolimit} (default)
 }
 }
 \details{
