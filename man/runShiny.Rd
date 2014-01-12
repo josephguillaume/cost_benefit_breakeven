@@ -13,7 +13,7 @@ runShiny(...,name="shiny_perctolimit")
   \item{\dots}{
     Arguments to pass to \code{\link{runApp}}
 }
-  \item{\name}{
+  \item{name}{
     User interface to use: \code{shiny1} or \code{shiny_perctolimit} (default)
 }
 }
