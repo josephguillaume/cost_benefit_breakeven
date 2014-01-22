@@ -181,6 +181,9 @@ if(!is.na(breakeven.factor) && breakeven.factor=="pump.cost.dollar.per.ml") retu
 ## TODO: allow requesting more than one state variable
 if(!is.na(state.var)) return(get(state.var))
 
-years.discount.rate <- 1/(1 + discount.rate)^(1:nyears)
-sum(annual.cash.flow * years.discount.rate)
+#years.discount.rate <- 1/(1 + discount.rate)^(1:nyears)
+#sum(annual.cash.flow * years.discount.rate)
+## years.discount.rate is a geometric series. sum is: ((1+discount.rate)^(-nyears)-(1+discount.rate)^(-1+1))/(1-(1+discount.rate))
+annual.cash.flow * ((1+discount.rate)^(-nyears)-1)/(-discount.rate)
+
 }
