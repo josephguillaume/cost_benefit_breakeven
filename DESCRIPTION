@@ -1,7 +1,7 @@
 Package: cost.benefit.breakeven
 Type: Package
 Title: Exploration of breakeven points for cost-benefit analysis
-Version: 0.1
+Version: 0.2
 Date: 2013-11-14
 Author: Joseph Guillaume
 Maintainer: Joseph Guillaume <joseph.guillaume@gmail.com>

@@ -7,7 +7,7 @@ NPV for Managed Aquifer Recharge scenarios
 Calculate NPV for given \code{scen}
 }
 \usage{
-NPV(scen = "base", pump.cost.dollar.per.ml = 25, crop.water.requirement.ml.per.ha = c(cotton = 7.9, faba.bean = 2.7, cultivated.dryland = 0), crop.proportion.water.required = c(cotton = 0.72, faba.bean = 0.28, cultivated.dryland = 0), water.available = c(surface.regular.license.ml = 400, supplementary = 200, groundwater = 750), yield.per.ha = c(cotton = 9.5, faba.bean = 5, cultivated.dryland = (1.4 + 1.8)/2), price.per.yield = c(cotton = 538, faba.bean = 348, cultivated.dryland = (348 + 244)/2), variable.cost.per.ha = c(cotton = 2505, faba.bean = 565, cultivated.dryland = 224.6), total.overhead.cost = 173066, surface.evap.rate = 0.35, asr.loss.rate = 0.15, discount.rate = 0.07, nyears = 50, surface.evap.distrib = c(cotton = 0.75, faba.bean = 0.25, cultivated.dryland = 0), asr.capacity.ml = 600, basin.design.cost = 10000, basin.capital.cost.per.ml.per.infiltration = 264 * 0.5, basin.infiltration.rate = 0.5, basin.maintenance.rate = 0.03, asr.design.cost = 20000, asr.capital.cost.per.ml = 192, asr.treatment.capital.cost = 50000, asr.treatment.cost.per.ml = 70, asr.maintenance.rate = 0.03, net.environmental.cost = 0, breakeven.factor = NA)
+NPV(scen = "base", pump.cost.dollar.per.ml = 25, crop.water.requirement.ml.per.ha = c(cotton = 7.9, faba.bean = 2.7, cultivated.dryland = 0), water.available = c(surface.regular.license.ml = 400, supplementary = 200, groundwater = 750), yield.per.ha = c(cotton = 9.5, faba.bean = 5, cultivated.dryland = (1.4 + 1.8)/2), price.per.yield = c(cotton = 538, faba.bean = 348, cultivated.dryland = (348 + 244)/2), variable.cost.per.ha = c(cotton = 2505, faba.bean = 565, cultivated.dryland = 224.6), total.overhead.cost = 173066, surface.evap.rate = 0.35, asr.loss.rate = 0.15, discount.rate = 0.07, nyears = 50, surface.evap.distrib = c(cotton = 0.75, faba.bean = 0.25, cultivated.dryland = 0), asr.capacity.ml = 600, basin.design.cost = 10000, basin.capital.cost.per.ml.per.infiltration = 264 * 0.5, basin.infiltration.rate = 0.5, basin.maintenance.rate = 0.03, asr.design.cost = 20000, asr.capital.cost.per.ml = 192, asr.treatment.capital.cost = 50000, asr.treatment.cost.per.ml = 70, asr.maintenance.rate = 0.03, net.environmental.cost = 0, breakeven.factor = NA)
 }
 \arguments{
   \item{scen}{
@@ -18,9 +18,6 @@ NPV(scen = "base", pump.cost.dollar.per.ml = 25, crop.water.requirement.ml.per.h
 }
   \item{crop.water.requirement.ml.per.ha}{
 %%     ~~Describe \code{crop.water.requirement.ml.per.ha} here~~
-}
-  \item{crop.proportion.water.required}{
-%%     ~~Describe \code{crop.proportion.water.required} here~~
 }
   \item{water.available}{
 %%     ~~Describe \code{water.available} here~~

@@ -10,11 +10,6 @@ crop.water.requirement.ml.per.ha=c(
  faba.bean=2.7,
  cultivated.dryland=0
 ),
-                crop.proportion.water.required=c(
-                  cotton=0.72,
-                  faba.bean=0.28,
-                  cultivated.dryland=0
-                  ),
 water.available=c(
  surface.regular.license.ml=400,
  supplementary=200,
@@ -73,7 +68,7 @@ net.environmental.cost=0,
 ## Between scenarios
 if(scen=="base"){
   asr.ml=0
-  land.used.ha=c(cotton=105,faba.bean=NA,cultivated.dryland=280)
+  land.used.ha=c(cotton=NA,faba.bean=NA,cultivated.dryland=280)
 } else {
  asr.ml=water.available["surface.regular.license.ml"]+water.available["supplementary"] #600
  land.used.ha=c(cotton=NA,faba.bean=NA,cultivated.dryland=280)
@@ -87,23 +82,18 @@ if(scen=="base") {
  pump.vol.ml=water.available["groundwater"]
 } else {
   net.water.available=sum(water.available)-asr.loss.rate*asr.ml
-  ##c(cotton=906,faba.bean=354) for 1260, see spreadsheet
-  wanted.water.applied=net.water.available*crop.proportion.water.required
   pump.vol.ml=water.available["groundwater"]+(1-asr.loss.rate)*asr.ml
 }
 
 water.applied.ml=crop.water.requirement.ml.per.ha*land.used.ha
 
 if(is.na(land.used.ha["faba.bean"]) && is.na(land.used.ha["cotton"])){
- land.used.ha["faba.bean"]=wanted.water.applied["faba.bean"]/crop.water.requirement.ml.per.ha["faba.bean"]
- land.used.ha["cotton"]=wanted.water.applied["cotton"]/crop.water.requirement.ml.per.ha["cotton"]
- water.applied.ml=crop.water.requirement.ml.per.ha*land.used.ha
-} else if(is.na(land.used.ha["faba.bean"])){
-  ## Assume water limiting, not land - Faba bean area expands depending on water availability
-  land.used.ha["faba.bean"]=(net.water.available-sum(water.applied.ml,na.rm=T))/crop.water.requirement.ml.per.ha["faba.bean"]
+ ## Total land used throughout year (i.e. 2x actual land needed)
+ total.land.used=net.water.available/(crop.water.requirement.ml.per.ha["faba.bean"]+crop.water.requirement.ml.per.ha["cotton"])
+ land.used.ha["faba.bean"]=total.land.used
+ land.used.ha["cotton"]=total.land.used
  water.applied.ml=crop.water.requirement.ml.per.ha*land.used.ha
 }
-
 
 gross.value.per.yield=yield.per.ha*price.per.yield
 gross.margin.per.ha=gross.value.per.yield-variable.cost.per.ha
