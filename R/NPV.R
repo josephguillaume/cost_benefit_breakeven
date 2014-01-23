@@ -61,7 +61,7 @@ basin.maintenance.rate=0.03,
 asr.design.cost=20000,
 asr.capital.cost.per.ml=192,
 asr.treatment.capital.cost=50000,
-asr.treatment.cost.per.ml=70,
+asr.treatment.cost.per.ml=150,
 asr.maintenance.rate=0.03,
 
 net.environmental.cost=0,
@@ -127,11 +127,7 @@ net.farm.income.per.ml=net.farm.income/water.applied.ml
 ## Costs
 
 if(scen=="base"){
- ## Cost of evaporative losses
- total.evap.loss=surface.evap.rate*sum(water.available[c("surface.regular.license.ml","supplementary")])
- evaporation.lost.farm.income=sum(total.evap.loss*surface.evap.distrib*net.farm.income.per.ml,na.rm=T)
- cost=evaporation.lost.farm.income+
-  pump.vol.ml*pump.cost.dollar.per.ml ## groundwater pumping
+ cost=pump.vol.ml*pump.cost.dollar.per.ml ## groundwater pumping
 } else if(scen=="basin"){
  ## Basin infiltration
   basin.capital.cost.per.ml=basin.capital.cost.per.ml.per.infiltration/basin.infiltration.rate
