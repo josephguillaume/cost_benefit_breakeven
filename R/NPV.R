@@ -15,6 +15,12 @@ water.available=c(
  supplementary=200,
  groundwater=750
 ),
+## If NA, is calculated.       
+gross.margin.per.ml=c(
+ cotton=NA,
+ faba.bean=NA,
+  cultivated.dryland=Inf
+),
 yield.per.ha=c(
  cotton=9.5,
  faba.bean=5,
@@ -65,13 +71,12 @@ net.environmental.cost=0,
 
 ){
 
+ 
 ## Between scenarios
 if(scen=="base"){
   asr.ml=0
-  land.used.ha=c(cotton=NA,faba.bean=NA,cultivated.dryland=280)
 } else {
  asr.ml=water.available["surface.regular.license.ml"]+water.available["supplementary"] #600
- land.used.ha=c(cotton=NA,faba.bean=NA,cultivated.dryland=280)
 }
 
 ################################################
@@ -85,31 +90,40 @@ if(scen=="base") {
   pump.vol.ml=water.available["groundwater"]+(1-asr.loss.rate)*asr.ml
 }
 
-water.applied.ml=crop.water.requirement.ml.per.ha*land.used.ha
+  land.used.ha=c(cotton=NA,faba.bean=NA,cultivated.dryland=280)
 
-if(is.na(land.used.ha["faba.bean"]) && is.na(land.used.ha["cotton"])){
- ## Total land used throughout year (i.e. 2x actual land needed)
- total.land.used=net.water.available/(crop.water.requirement.ml.per.ha["faba.bean"]+crop.water.requirement.ml.per.ha["cotton"])
- land.used.ha["faba.bean"]=total.land.used
- land.used.ha["cotton"]=total.land.used
- water.applied.ml=crop.water.requirement.ml.per.ha*land.used.ha
+if(any(is.na(gross.margin.per.ml))){##ML/ha calculation
+
+  water.applied.ml=crop.water.requirement.ml.per.ha*land.used.ha
+
+  if(is.na(land.used.ha["faba.bean"]) && is.na(land.used.ha["cotton"])){
+    ## Total land used throughout year (i.e. 2x actual land needed)
+    total.land.used=net.water.available/(crop.water.requirement.ml.per.ha["faba.bean"]+crop.water.requirement.ml.per.ha["cotton"])
+    land.used.ha["faba.bean"]=total.land.used
+    land.used.ha["cotton"]=total.land.used
+    water.applied.ml=crop.water.requirement.ml.per.ha*land.used.ha
+  }
+
+  gross.value.per.yield=yield.per.ha*price.per.yield
+  gross.margin.per.ha=gross.value.per.yield-variable.cost.per.ha
+
+  gross.margin.per.ml=gross.margin.per.ha/crop.water.requirement.ml.per.ha
+
+  total.farm.gross.margin=land.used.ha*gross.margin.per.ha
+
+} else{
+  water.applied.ml=net.water.available*crop.water.requirement.ml.per.ha/sum(crop.water.requirement.ml.per.ha)
+  total.farm.gross.margin=water.applied.ml*gross.margin.per.ml
+  total.farm.gross.margin["cultivated.dryland"] <- land.used.ha["cultivated.dryland"]*(yield.per.ha["cultivated.dryland"]*price.per.yield["cultivated.dryland"]-variable.cost.per.ha["cultivated.dryland"])
 }
 
-gross.value.per.yield=yield.per.ha*price.per.yield
-gross.margin.per.ha=gross.value.per.yield-variable.cost.per.ha
-
-gross.margin.per.ml=gross.margin.per.ha/crop.water.requirement.ml.per.ha
-
-total.farm.gross.margin=land.used.ha*gross.margin.per.ha
-
-#total.contrib.farm.income=total.farm.gross.margin/sum(total.farm.gross.margin)
+##total.contrib.farm.income=total.farm.gross.margin/sum(total.farm.gross.margin)
 ## Fixed for each scenario
 total.contrib.farm.income=c(cotton=56.9188118961194,faba.bean=28.4027025937631,cultivated.dryland=14.6784855101176)/100
 overhead.cost=total.overhead.cost*total.contrib.farm.income
 
 net.farm.income=total.farm.gross.margin-overhead.cost
 net.farm.income.per.ml=net.farm.income/water.applied.ml
-
 
 ## if(exists("details") && isTRUE(details) ) print(cbind(crop.water.requirement.ml.per.ha,land.used.ha,water.applied.ml,yield.per.ha, price.per.yield,gross.value.per.yield,variable.cost.per.ha,gross.margin.per.ha,gross.margin.per.ml,total.farm.gross.margin,overhead.cost,net.farm.income,total.contrib.farm.income,net.farm.income.per.ml))
 
