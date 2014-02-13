@@ -4,7 +4,7 @@ library(hydromad) ##SCEoptim
 library(cost.benefit.breakeven)
 
 radioButtonsTable <-
-function (inputId, label, data,choices,selected=NULL)
+function (inputId, label, data,choices,selected=NULL,titles=list())
 {
     choices <- shiny:::choicesWithNames(choices)
     if (is.null(selected))
@@ -31,19 +31,19 @@ function (inputId, label, data,choices,selected=NULL)
                                    ##class = 'hide',
                                    tags$tr(
                                            lapply(names(data), function(name) {
-                                               tags$th(name)
+                                               return(tags$th(name,title=titles[[name]]))
                                            }),
                                            tags$th("plot")
                                            )
                                    ),
                         tags$tbody(
                                    lapply(1:nrow(data), function(i) {
-                                       tags$tr(
-                                               lapply(names(data), function(name) {
-                                                   tags$td(as.character(data[i,name]))
-                                               }),
-                                               tags$td(inputTags[[i]])
-                                               )
+                                     tags$tr(
+                                             lapply(names(data), function(name) {
+                                               tags$td(as.character(data[i,name]))
+                                             }),
+                                             tags$td(inputTags[[i]])
+                                             )
                                    })
                                    )
                         )
@@ -179,8 +179,8 @@ shinyServer(function(input, output, session) {
       perc.to.limit <- get.normalised(uni.bkeven$"break",limits()$Modeled,limits()$X1,limits()$X2)
       perc.change <- (uni.bkeven$"break"-limits()$Modeled)/limits()$Modeled
       uni.bkeven$"% change of best guess" <- ifelse(is.na(perc.change),"",sprintf("%g%%",round(perc.change,2)*100))
-      uni.bkeven$"% distance from best guess" <- ifelse(is.na(perc.to.limit),"",sprintf("%g%%",round(perc.to.limit,2)*100))
-      uni.bkeven$"% distance from bound" <- ifelse(is.na(perc.to.limit),"",sprintf("%g%%",round(1-perc.to.limit,2)*100))
+      uni.bkeven$"Level of comfort" <- ifelse(is.na(perc.to.limit),"",sprintf("%g%%",round(perc.to.limit,2)*100))
+      uni.bkeven$"Level of concern" <- ifelse(is.na(perc.to.limit),"",sprintf("%g%%",round(1-perc.to.limit,2)*100))
       uni.bkeven$NPV <-sapply(limits()$Variable,function(var){
           pars <- as.list(eval(formals(NPV)))
           for (i in 1:nrow(limits())) eval(parse(text = sprintf("pars$%s <- %f",
@@ -201,14 +201,17 @@ shinyServer(function(input, output, session) {
       input$baseline
       uni.bkeven <- uni.bkevenf()
       radioButtonsTable("uni_plot_variable_selected",
-                        "Univariate break-even values", uni.bkeven[,c("% distance from best guess",
-                                                                      "% distance from bound",
+                        "Univariate break-even values", uni.bkeven[,c("Level of comfort",
+                                                                      "Level of concern",
                                                                       "Value at crossover point",
                                                                       "% change of best guess",
                                                                       "NPV"
                                                                       )],
-                        choices=uni.bkeven$Variable,selected=isolate(input$uni_plot_variable_selected)
-                        )
+                        choices=uni.bkeven$Variable,selected=isolate(input$uni_plot_variable_selected),
+                        title=list(
+                          "Level of comfort"="% distance from best guess",
+                          "Level of concern"="% distance from bound"
+                        ))
     })
 
     output$uni_plot <- renderPlot({
