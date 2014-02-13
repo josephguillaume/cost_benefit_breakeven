@@ -128,7 +128,7 @@ display: table-cell;
                                 ##sidebarPanel(
                                          div(class="sidespacer",
                                              ##TODO: generalise
-                                             selectInput("scen","Case 1:",choices=c("base","basin","injection")),
+                                             selectInput("scen","Case 1:",choices=c("base","basin","injection"),selected="basin"),
                                              selectInput("baseline"," - Case 2:",choices=c("base","basin","injection"))
                                              ),
                                      {
@@ -177,8 +177,8 @@ display: table-cell;
                                                               tags$b("Why is the best guess selected:"),br(),
                                                               tags$textarea(id="notes_bestguess",rows=3,cols=40),br(),
                                                               tags$b("What influences the bounds:"),br(),
-tags$li("Are the exploration bounds too narrow? Are other values possible?"),
-tags$li("Are the minimum and maximum values too wide? Are the values impossible?"),
+tags$li("Are the exploration bounds too narrow? Could other values be of concern?"),
+tags$li("Are the minimum and maximum values too wide? Are any values definitely not of concern?"),
                                                               tags$textarea(id="notes_bounds",rows=3,cols=40),
                                                               actionButton("btn_save_notes","Save notes"),
                                                               actionButton("btn_reset_notes","Reset notes")
@@ -198,7 +198,7 @@ tags$li("Are the minimum and maximum values too wide? Are the values impossible?
                                                               tags$b("Why is the best guess selected:"),br(),
                                                               tags$textarea(id="notes_bestguess1",rows=3,cols=40),br(),
                                                               tags$b("What influences the bounds:"),br(),
-                                                              tags$li("Is this crossover point possible? Why/why not?"),
+                                                              tags$li("Is this crossover point of concern? Why/why not?"),
                                                               tags$li("What should the bounds be?"),
                                                               tags$li("If there is no crossover point, is this expected? why?"),
                                                               tags$textarea(id="notes_bounds1",rows=3,cols=40),br(),
@@ -230,7 +230,7 @@ tags$li("Are the minimum and maximum values too wide? Are the values impossible?
                                                               div(style="display:inline-block",textOutput("bi_selected_var2"),br(),
                                                               tags$textarea(id="notes_bestguess2b",rows=3,cols=40)),br(),
                                                               tags$b("What influences the bounds:"),br(),
-                                                              tags$li("Is this crossover point possible? Why/why not?"),
+                                                              tags$li("Is this crossover point of concern? Why/why not?"),
                                                               tags$li("What should the bounds be?"),
                                                               tags$li("If there is no crossover point, is this expected? why?"),
                                                               tags$textarea(id="notes_bounds2a",rows=3,cols=40),
