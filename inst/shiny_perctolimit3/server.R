@@ -1,4 +1,5 @@
 library(ggplot2)
+library(scales)
 library(shiny)
 library(hydromad) ##SCEoptim
 library(cost.benefit.breakeven)
@@ -230,8 +231,8 @@ shinyServer(function(input, output, session) {
               geom_hline(aes(yintercept=x,linetype="Equal NPV",size="Equal NPV",colour="Equal NPV"),data=data.frame(x=0))+
                 stat_function(aes(linetype="Difference in NPV",size="Difference in NPV",colour="Difference in NPV"),fun=Vectorize(basin_base0))+
                   scale_linetype_manual(name="Lines",values=c("Limits"="solid","Best guess"="dashed","Equal NPV"="solid","Difference in NPV"="solid"))+
-                    scale_size_manual(name="Lines",values=c("Limits"=0.5,"Best guess"=0.5,"Equal NPV"=1.5,"Difference in NPV"=1))+
-                      scale_colour_manual(name="Lines",values=c("Limits"="grey","Best guess"="grey","Equal NPV"="grey","Difference in NPV"="black"))+
+                    scale_size_manual(name="Lines",values=c("Limits"=0.5,"Best guess"=0.5,"Equal NPV"=1,"Difference in NPV"=1))+
+                      scale_colour_manual(name="Lines",values=c("Limits"="black","Best guess"="black","Equal NPV"="grey","Difference in NPV"="black"))+
                         scale_x_continuous(name=variable,limits=range(c(ranges0$Min,ranges0$Max,limits()[variable,"X1"],limits()[variable,"X2"])))+
                           scale_y_continuous(name=sprintf("NPV of %s - NPV of %s",input$scen,input$baseline))+
                               theme(legend.position="top")
@@ -277,13 +278,13 @@ shinyServer(function(input, output, session) {
         v2 <- vtemp
       }
       wvars <- match(c(v1,v2),limits()$Variable)
-      perc.to.limit <- apply(pom,1,function(x) max(get.normalised(x,limits()$Modeled[wvars],limits()$X1[wvars],limits()$X2[wvars])))*100
+      perc.to.limit <- apply(pom[,c(v1,v2)],1,function(x) max(get.normalised(x,limits()$Modeled[wvars],limits()$X1[wvars],limits()$X2[wvars])))*100
       g <- ggplot()+
-        geom_point(aes(x=x1,y=x2,color=perc.to.limit),data=data.frame(x1=pom[,v1],x2=pom[,v2],perc.to.limit=perc.to.limit))+
+        geom_point(aes(x=x1,y=x2,color=level.of.concern),data=data.frame(x1=pom[,v1],x2=pom[,v2],level.of.concern=100-perc.to.limit))+
           scale_x_continuous(name=v1)+scale_y_continuous(name=v2)+
             ##scale_x_continuous(name=v1,limits=range(c(pom[,v1],ranges[ranges$Variable==v1,"Modeled"]),na.rm=TRUE))+
             ##scale_y_continuous(name=v2,limits=range(c(pom[,v2],ranges[ranges$Variable==v2,"Modeled"]),na.rm=TRUE))+
-            scale_colour_gradient(name="% to limit",limits=c(0,100))+
+            scale_colour_gradient2(name="Level of concern",limits=c(0,100),low="#008800",mid="#FFA500",high="#FF0000",midpoint=50)+
               geom_point(aes(x=X1,y=X2),color="red",data=data.frame(t(limits()$Modeled[wvars])))+
                 geom_vline(aes(xintercept=x,linetype="Best guess"),data=data.frame(x=as.numeric(limits()[wvars[1],"Modeled"])))+
                   geom_hline(aes(yintercept=x,linetype="Best guess"),data=data.frame(x=as.numeric(limits()[wvars[2],"Modeled"])))+
