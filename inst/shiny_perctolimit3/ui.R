@@ -104,6 +104,10 @@ display: table-cell;
 }
 #uni_plot_variable_selected>thead>tr{height:62px}
 
+.highconcern {color:red}
+.midconcern {color:orange}
+.lowconcern {color:green}
+
 /* BIVARIATE and MULTIVARIATE*/
 .bivspacer {height:33px} /*label+th-first row (see .sidespacer) (20+5)+(2+62)-55 */
 .rbtrow{
@@ -171,7 +175,7 @@ display: table-cell;
                                                              div(class="well",
                                                               selectInput("notes_which","Variable",ranges$Variable,ranges$Variable[1]),br(),
                                                               tags$b("Why is the best guess selected:"),br(),
-                                                              tags$textarea(id="notes_bestguess",rows=3,cols=40),
+                                                              tags$textarea(id="notes_bestguess",rows=3,cols=40),br(),
                                                               tags$b("What influences the bounds:"),br(),
 tags$li("Are the exploration bounds too narrow? Are other values possible?"),
 tags$li("Are the minimum and maximum values too wide? Are the values impossible?"),

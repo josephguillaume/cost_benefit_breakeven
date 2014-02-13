@@ -4,7 +4,7 @@ library(hydromad) ##SCEoptim
 library(cost.benefit.breakeven)
 
 radioButtonsTable <-
-function (inputId, label, data,choices,selected=NULL,titles=list())
+function (inputId, label, data,choices,selected=NULL,titles=list(),concern=NULL)
 {
     choices <- shiny:::choicesWithNames(choices)
     if (is.null(selected))
@@ -39,6 +39,7 @@ function (inputId, label, data,choices,selected=NULL,titles=list())
                         tags$tbody(
                                    lapply(1:nrow(data), function(i) {
                                      tags$tr(
+                                             class=concern[i],
                                              lapply(names(data), function(name) {
                                                tags$td(as.character(data[i,name]))
                                              }),
@@ -176,11 +177,11 @@ shinyServer(function(input, output, session) {
 
     uni.bkevenf <- reactive({
       uni.bkeven <- this.univariate.breakeven()
-      perc.to.limit <- get.normalised(uni.bkeven$"break",limits()$Modeled,limits()$X1,limits()$X2)
+      uni.bkeven$perc.to.limit <- get.normalised(uni.bkeven$"break",limits()$Modeled,limits()$X1,limits()$X2)
       perc.change <- (uni.bkeven$"break"-limits()$Modeled)/limits()$Modeled
       uni.bkeven$"% change of best guess" <- ifelse(is.na(perc.change),"",sprintf("%g%%",round(perc.change,2)*100))
-      uni.bkeven$"Level of comfort" <- ifelse(is.na(perc.to.limit),"",sprintf("%g%%",round(perc.to.limit,2)*100))
-      uni.bkeven$"Level of concern" <- ifelse(is.na(perc.to.limit),"",sprintf("%g%%",round(1-perc.to.limit,2)*100))
+      uni.bkeven$"Level of comfort" <- ifelse(is.na(uni.bkeven$perc.to.limit),"",sprintf("%g%%",round(uni.bkeven$perc.to.limit,2)*100))
+      uni.bkeven$"Level of concern" <- ifelse(is.na(uni.bkeven$perc.to.limit),"",sprintf("%g%%",round(1-uni.bkeven$perc.to.limit,2)*100))
       uni.bkeven$NPV <-sapply(limits()$Variable,function(var){
           pars <- as.list(eval(formals(NPV)))
           for (i in 1:nrow(limits())) eval(parse(text = sprintf("pars$%s <- %f",
@@ -211,7 +212,10 @@ shinyServer(function(input, output, session) {
                         title=list(
                           "Level of comfort"="% distance from best guess",
                           "Level of concern"="% distance from bound"
-                        ))
+                        ),
+                        concern=ifelse(1-uni.bkeven$perc.to.limit>0.75,"highconcern",
+                          ifelse(1-uni.bkeven$perc.to.limit>0.25,"midconcern","lowconcern"))
+                        )
     })
 
     output$uni_plot <- renderPlot({
