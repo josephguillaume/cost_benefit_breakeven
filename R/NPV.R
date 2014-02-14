@@ -154,7 +154,7 @@ if(scen=="base"){
 
  farm.dam.maintenance=farm.dam.maintenance.rate*farm.dam.cost
 
- ongoing.cost=pump.cost+farm.dam.maintenance
+ ongoing.cost=pump.cost+farm.dam.maintenance+surface.pump.cost
  cost=annualised.capital.cost(capital.cost,discount.rate,nyears)+ongoing.cost
 } else if(scen=="basin"){
  ## Basin infiltration
