@@ -25,6 +25,12 @@ createBreakevenFun <- function(scen,baseline,breakeven.factor,ranges,fixed.vals=
         }",fixed.vals2,scen,settings,baseline))))
     }
     if(breakeven.factor=="pump.cost.dollar.per.ml"){
+        scen.surface.pump=ifelse(scen=="base",
+        "pars$capture.pump.cost.ratio.surface*total.surface.water",
+        "pars$capture.pump.cost.ratio.mar*total.surface.water")
+        base.surface.pump=ifelse(baseline=="base",
+        "pars$capture.pump.cost.ratio.surface*total.surface.water",
+        "pars$capture.pump.cost.ratio.mar*total.surface.water")
         return(eval(parse(text=sprintf("
         function(x){
             x<-as.numeric(x)
@@ -41,8 +47,12 @@ createBreakevenFun <- function(scen,baseline,breakeven.factor,ranges,fixed.vals=
             annual2=do.call(NPV,pars)
             pars$state.var='pump.vol.ml'
             pumpvol2=do.call(NPV,pars)
+            pars$state.var='total.surface.water'
+            total.surface.water=do.call(NPV,pars)
+            pumpvol1=pumpvol1+%s
+            pumpvol2=pumpvol2+%s
             delta=-(annual1-annual2)/(pumpvol2-pumpvol1)
             return(pars$pump.cost.dollar.per.ml+delta)
-        }",fixed.vals2,scen,settings,baseline))))
+        }",fixed.vals2,scen,settings,baseline,scen.surface.pump,base.surface.pump))))
     }##pump.cost.dollar.per.ml
 }## createBreakevenFun
