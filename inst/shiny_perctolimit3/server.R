@@ -324,6 +324,7 @@ shinyServer(function(input, output, session) {
     ## Base
     observe({
         cat("updating notes bestguess\n",file=stderr())
+        handle.load.notes()
         input$notes_which
         input$btn_reset_notes
         new.notes()
@@ -339,6 +340,7 @@ shinyServer(function(input, output, session) {
     observe({
         cat("saving notes bestguess\n",file=stderr())
         new.notes()
+        handle.load.notes()
         ## FIXME: intended to prevent overwriting data with blanks, must be more reliable way to do it for all notes
         if(input$btn_save_notes==0) return()
         notes$bestguess[notes$Variable==isolate(input$notes_which)] <<- isolate(input$notes_bestguess)
@@ -349,6 +351,7 @@ shinyServer(function(input, output, session) {
     ## Single variable
     observe({
         cat("updating notes single-var\n",file=stderr())
+        handle.load.notes()
         input$uni_plot_variable_selected
         input$btn_reset_notes1
         new.notes()
@@ -371,6 +374,7 @@ shinyServer(function(input, output, session) {
     })
     observe({
         cat("saving notes single-var\n",file=stderr())
+        handle.load.notes()
         input$btn_save_notes1
         new.notes()
         notes$bestguess[notes$Variable==isolate(input$uni_plot_variable_selected)] <<- isolate(input$notes_bestguess1)
@@ -383,6 +387,7 @@ shinyServer(function(input, output, session) {
     ## Two variable
     observe({
         cat("updating notes two-var\n",file=stderr())
+        handle.load.notes()
         input$bi_var1
         input$bi_var2
         input$btn_reset_notes2
@@ -418,6 +423,7 @@ shinyServer(function(input, output, session) {
     })
     observe({
         cat("saving notes two-var\n",file=stderr())
+        handle.load.notes()
         input$btn_save_notes2
         new.notes()
         notes$bestguess[notes$Variable==isolate(input$bi_var1)] <<- isolate(input$notes_bestguess2a)
@@ -530,5 +536,37 @@ difference: $%0.2f",
               )
     })
 
+    ################################################################################
+
+    output$save_notes <-
+        downloadHandler(filename = function() {
+                            format(Sys.time(),format="notes_%Y%m%d_%H%M.csv")
+                        },
+                        content = function(con) {
+                            write.csv(notes, con,row.names=FALSE)
+                        })
+
+    output$save_bounds <-
+        downloadHandler(filename = function() {
+                            format(Sys.time(),format="bounds_%Y%m%d_%H%M.csv")
+                        },
+                        content = function(con) {
+                            write.csv(limits(), con,row.names=FALSE)
+                        })
+
+    handle.load.notes <- reactive({
+        cat("Handle load notes\n")
+        inFile <- input$load_notes
+        if (!is.null(inFile)){
+            cat(sprintf(" Loading %s\n",inFile$datapath))
+            temp.notes<-read.csv(inFile$datapath,stringsAsFactors=FALSE)
+            if(all(c("Variable","bestguess","bounds","direction","is.problem") %in% names(temp.notes))) {
+                cat("Saved\n")
+                notes<<-temp.notes
+            } else {
+                cat("Notes csv not in right format\n")
+            }
+        }
+    })
 
 })#shinyServer

@@ -155,7 +155,11 @@ display: table-cell;
                                          ##do.call(div,sliders)
                                          div(class="well",sliders,
                                              id="more",class="control-group shiny-input-checkboxgroup")
-                                       }
+                                       },
+                            div(downloadButton("save_notes","Save notes"),downloadButton("save_bounds","Save bounds"),style="display:inline-block"),p(),
+                            fileInput("load_notes","Load notes",accept="")
+                            ##fileInput("load_bounds","Load bounds",accept=""),
+
                             ##uiOutput("more_sliders"),
                             ##actionButton("update_ranges","Update")
                             ),##sidebarPanel
