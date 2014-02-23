@@ -468,72 +468,96 @@ difference: $%0.2f",
         input$more_update
         active_vars <- isolate(input$more)
         if(length(active_vars)==0) stop("Select variables to use")
-        breakeven_factor <- isolate(input$more_bkeven)
-        cat("Breakeven factor: ",breakeven_factor,"\n",sep="",file=stderr())
-        active_vars<- setdiff(active_vars,breakeven_factor)
-        cat("Other factors:",active_vars,"\n",sep=" ",file=stderr())
-        which.all <- match(c(active_vars,breakeven_factor),ranges$Variable)
-        which.active <- match(active_vars,ranges$Variable)
-        limit.val <- sapply(c(active_vars,breakeven_factor),function(v) isolate(input[[sprintf("more_slider_%s",v)]]))
-        print(limit.val)
-        start.pos <- ranges$Modeled[which.all]
 
-        ## Optimise
-        net.environmental.cost <-
-            createBreakevenFun(isolate(input$scen),
-                               isolate(input$baseline),
-                               breakeven_factor,
-                               ranges[which.active,])
+        if(isolate(input$manyvar_method)=="lynchpin"){
+            cat(" Using lynchpin method\n")
 
-        get.normalised <- function(x)
-            ifelse(abs(x-start.pos)<1e-5,0,
-                   ifelse(x>start.pos,
-                          (x-start.pos)/(limit.val[2,]-start.pos),
-                          (start.pos-x)/(start.pos-limit.val[1,])
-                          ))
+            breakeven_factor <- isolate(input$more_bkeven)
+            cat("Breakeven factor: ",breakeven_factor,"\n",sep="",file=stderr())
+            active_vars<- setdiff(active_vars,breakeven_factor)
+            cat("Other factors:",active_vars,"\n",sep=" ",file=stderr())
+            which.all <- match(c(active_vars,breakeven_factor),ranges$Variable)
+            which.active <- match(active_vars,ranges$Variable)
+            limit.val <- sapply(c(active_vars,breakeven_factor),function(v) isolate(input[[sprintf("more_slider_%s",v)]]))
+            print(limit.val)
+            start.pos <- ranges$Modeled[which.all]
 
-        ## minimise the complement of the fuzzy membership function
-        ## i.e. maximise the fuzzy membership function
-        f <- function(x){
-            tryCatch(y <- net.environmental.cost(x),error=function(e) browser())
-            x <- c(x,y)
-            ##updateTextInput(session,"more_status",as.character(max(get.normalised(x)))) ##TODO: doesn't seem to work?
-            max(get.normalised(x))
+            ## Optimise
+            net.environmental.cost <-
+                createBreakevenFun(isolate(input$scen),
+                                   isolate(input$baseline),
+                                   breakeven_factor,
+                                   ranges[which.active,])
+
+            get.normalised <- function(x)
+                ifelse(abs(x-start.pos)<1e-5,0,
+                       ifelse(x>start.pos,
+                              (x-start.pos)/(limit.val[2,]-start.pos),
+                              (start.pos-x)/(start.pos-limit.val[1,])
+                              ))
+
+            ## minimise the complement of the fuzzy membership function
+            ## i.e. maximise the fuzzy membership function
+            f <- function(x){
+                tryCatch(y <- net.environmental.cost(x),error=function(e) browser())
+                x <- c(x,y)
+                ##updateTextInput(session,"more_status",as.character(max(get.normalised(x)))) ##TODO: doesn't seem to work?
+                max(get.normalised(x))
+            }
+
+            if(require("compiler")){
+                net.environmental.cost <- cmpfun(net.environmental.cost)
+                get.normalised <- cmpfun(get.normalised)
+                f <- cmpfun(f)
+            }
+
+            ##FIXME poorly identified solution, significant parameter interactions, weak sensitivity, very small part of parameter space
+            ## optim L-BFGS-B fails
+            ## Can't use barrier function with non-gradient-based technique, e.g. stochasticity of SCEoptim -> end up just at Inf
+            st <- proc.time()
+            opt <- SCEoptim(f,ranges$Modeled[which.active], ##init.pos,
+                            ##lower=pmin(limit.val[1:4],start.pos[1:4])*0.99,
+                            ##upper=pmax(limit.val[1:4],start.pos[1:4])*1.01,
+                            lower=ranges$Min[which.active],
+                            upper=ranges$Max[which.active],
+                            control=list(ncomplex=20,trace=1) #,returnpop=TRUE)
+                            )
+            print(proc.time()-st)
+            print(str(opt))
+            normalised <- get.normalised(c(opt$par,net.environmental.cost(opt$par)))
+            print(normalised)
+            ## print(which.max(normalised))
+            ## net.environmental.cost2 <- createFun(isolate(input$scen),
+            ##                                      isolate(input$baseline),
+            ##                                      ranges[which.all,])
+            ##print(net.environmental.cost2(c(opt$par,net.environmental.cost(opt$par)))) ##should be zero
+            df <- isolate(uni.bkevenf())
+            return(cbind(df[which.all,c("Variable","Min","Max","break.","Modeled")],
+                         ##limit.val,
+                         ##pmin(limit.val,start.pos),pmax(limit.val,start.pos),
+                         break.even=c(opt$par,net.environmental.cost(opt$par)),
+                         change=c(opt$par,net.environmental.cost(opt$par))-start.pos,
+                         level.of.concern=(1-normalised)*100
+                         ))
+        } else if(isolate(input$manyvar_method)=="equiconcern"){
+            cat(" Using equiconcern method\n")
+            which.active <- match(active_vars,ranges$Variable)
+            temp.ranges <- isolate(limits())[which.active,]
+            temp.ranges$Min <- temp.ranges$X1
+            temp.ranges$Max <- temp.ranges$X2
+            ##print(temp.ranges)
+            res <- crossoverEquiconcern(isolate(input$scen),
+                                        isolate(input$baseline),
+                                        temp.ranges)
+            df <- isolate(uni.bkevenf())
+            return(cbind(df[which.active,c("Variable","Min","Max","break.","Modeled")],
+                         ##limit.val,
+                         ##pmin(limit.val,start.pos),pmax(limit.val,start.pos),
+                         break.even=res$values,
+                         change=res$values-temp.ranges$Modeled,
+                         level.of.concern=res$loc
+                         ))
         }
-
-        if(require("compiler")){
-          net.environmental.cost <- cmpfun(net.environmental.cost)
-          get.normalised <- cmpfun(get.normalised)
-          f <- cmpfun(f)
-        }
-
-        ##FIXME poorly identified solution, significant parameter interactions, weak sensitivity, very small part of parameter space
-        ## optim L-BFGS-B fails
-        ## Can't use barrier function with non-gradient-based technique, e.g. stochasticity of SCEoptim -> end up just at Inf
-        st <- proc.time()
-        opt <- SCEoptim(f,ranges$Modeled[which.active],##init.pos,
-                        ##lower=pmin(limit.val[1:4],start.pos[1:4])*0.99,
-                        ##upper=pmax(limit.val[1:4],start.pos[1:4])*1.01,
-                        lower=ranges$Min[which.active],
-                        upper=ranges$Max[which.active],
-                        control=list(ncomplex=20,trace=1) #,returnpop=TRUE)
-                        )
-        print(proc.time()-st)
-        print(str(opt))
-        normalised <- get.normalised(c(opt$par,net.environmental.cost(opt$par)))
-        print(normalised)
-        ## print(which.max(normalised))
-        ## net.environmental.cost2 <- createFun(isolate(input$scen),
-        ##                                      isolate(input$baseline),
-        ##                                      ranges[which.all,])
-        ##print(net.environmental.cost2(c(opt$par,net.environmental.cost(opt$par)))) ##should be zero
-        df <- isolate(uni.bkevenf())
-        cbind(df[which.all,c("Variable","Min","Max","break.","Modeled")],
-              ##limit.val,
-              ##pmin(limit.val,start.pos),pmax(limit.val,start.pos),
-              break.even=c(opt$par,net.environmental.cost(opt$par)),
-              change=c(opt$par,net.environmental.cost(opt$par))-start.pos
-              )
     })
 
     ################################################################################

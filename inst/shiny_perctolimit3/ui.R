@@ -285,6 +285,8 @@ tags$li("Are the minimum and maximum values too wide? Are any values definitely 
                                                          div(style="position:absolute;width:80%;right:0;padding-left:5%",
                                                              p("Tick checkboxes to select the variables to vary."),
                                                              p("Select radiobutton as lynchpin variable (allows the analysis to function)."),
+                                                             "Select optimisation method:",br(),
+                                                             radioButtons("manyvar_method","",choices=c("Optimisation using lynchpin"="lynchpin","Solve along lines of equal concern"="equiconcern"),selected="Solve along lines of equal concern"),
                                                              actionButton("more_update","Update"),
                                                              br(),
                                                              ##textInput("more_status","",""),
