@@ -285,13 +285,13 @@ shinyServer(function(input, output, session) {
             ##scale_x_continuous(name=v1,limits=range(c(pom[,v1],ranges[ranges$Variable==v1,"Modeled"]),na.rm=TRUE))+
             ##scale_y_continuous(name=v2,limits=range(c(pom[,v2],ranges[ranges$Variable==v2,"Modeled"]),na.rm=TRUE))+
             scale_colour_gradient2(name="Level of concern",limits=c(0,100),low="#008800",mid="#FFA500",high="#FF0000",midpoint=50)+
-              geom_point(aes(x=X1,y=X2),color="red",data=data.frame(t(limits()$Modeled[wvars])))+
-                geom_vline(aes(xintercept=x,linetype="Best guess"),data=data.frame(x=as.numeric(limits()[wvars[1],"Modeled"])))+
-                  geom_hline(aes(yintercept=x,linetype="Best guess"),data=data.frame(x=as.numeric(limits()[wvars[2],"Modeled"])))+
-                    geom_vline(aes(xintercept=x,linetype="Limits"),data=data.frame(x=as.numeric(limits()[wvars[1],c("X1","X2")])))+
-                      geom_hline(aes(yintercept=x,linetype="Limits"),data=data.frame(x=as.numeric(limits()[wvars[2],c("X1","X2")])))+
-                        geom_segment(aes(x=x,y=y,xend=xend,yend=yend,linetype="Equidistant lines"),data=data.frame(x=limits()$Modeled[wvars[1]],y=limits()$Modeled[wvars[2]],expand.grid(xend=as.numeric(limits()[wvars[1],c("X1","X2")]),yend=as.numeric(limits()[wvars[2],c("X1","X2")]))))+
-                          scale_linetype_manual(name="Lines",values=c("Limits"="solid","Best guess"="dashed","Equidistant lines"="dotted"))
+              ##geom_point(aes(x=X1,y=X2),color="red",data=data.frame(t(limits()$Modeled[wvars])))+
+                geom_vline(aes(xintercept=x,linetype="Best guess"),data=data.frame(x=as.numeric(limits()[wvars[1],"Modeled"])),show_guide=TRUE)+
+                  geom_hline(aes(yintercept=x,linetype="Best guess"),data=data.frame(x=as.numeric(limits()[wvars[2],"Modeled"])),show_guide=TRUE)+
+                    geom_vline(aes(xintercept=x,linetype="Limits"),data=data.frame(x=as.numeric(limits()[wvars[1],c("X1","X2")])),show_guide=TRUE)+
+                      geom_hline(aes(yintercept=x,linetype="Limits"),data=data.frame(x=as.numeric(limits()[wvars[2],c("X1","X2")])),show_guide=TRUE)+
+                        ##geom_segment(aes(x=x,y=y,xend=xend,yend=yend,linetype="Equidistant lines"),data=data.frame(x=limits()$Modeled[wvars[1]],y=limits()$Modeled[wvars[2]],expand.grid(xend=as.numeric(limits()[wvars[1],c("X1","X2")]),yend=as.numeric(limits()[wvars[2],c("X1","X2")]))))+
+                          scale_linetype_manual(name="Values",values=c("Limits"="solid","Best guess"="dashed","Equidistant lines"="dotted"))
       print(g)
     })
 
