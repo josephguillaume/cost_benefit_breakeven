@@ -15,9 +15,7 @@ crop.water.requirement.ml.per.ha=c(
  cultivated.dryland=0
 ),
 water.available=c(
- surface.regular.license.ml=400,
- supplementary=200,
- groundwater=750
+ supplementary=200
 ),
 ## If NA, is calculated.       
 gross.margin.per.ml=c(
@@ -36,15 +34,19 @@ price.per.yield=c(
  cultivated.dryland=(348+244)/2
 ),
 variable.cost.per.ha=c(
- cotton=2505+153.1, ##including opportunity cost of pigeon pea
+ cotton=2505+153.1,
  faba.bean=565,
  cultivated.dryland=224.6
 ),
-total.overhead.cost=173066,
-surface.evap.rate=0.35,
-asr.loss.rate=0.15,
+total.overhead.cost=0,
+surface.evap.rate=0.4,
+mar.loss.rate=0.05,
 discount.rate=.07,
-nyears=50,
+nyears=c(
+ base=30,
+ basin=30,
+ injection=20
+),
 
 ## Base case cost
 surface.evap.distrib=c(
@@ -52,26 +54,30 @@ surface.evap.distrib=c(
  faba.bean=0.25,
  cultivated.dryland=0
 ),
-farmdam.cost.per.ml=2250,
-farm.dam.maintenance.rate=0.03,
+farmdam.cost.per.ml=1000,
+include.farm.dam.capital.cost=0,
+farm.dam.maintenance.rate=0.005,
 asr.capacity.ml=NA,
 
 ## Basin infiltration
-basin.cost.temp.storage.per.ml=1000,
-basin.design.cost=10000,
+basin.cost.temp.storage.per.ml=0,
+basin.design.cost=NA,
+basin.design.cost.proportion.of.capital.cost=0.1,
 ## Cost to achieve volume for 90day recharge period etc.
 basin.capital.cost.per.ml=NA,
-basin.capital.cost.per.ml.at.0.5.m.per.day=277,
-basin.infiltration.rate=0.5, #m/day
-basin.maintenance.rate=0.03,
+basin.capital.cost.per.ml.at.0.2.m.per.day=363,
+basin.infiltration.rate=0.2, #m/day
+basin.maintenance.rate=0.1,
 
 # ASR injection
-asr.design.cost=20000,
-asr.capital.cost.per.ml=310,
-asr.cost.temp.storage.per.ml=1000,
-asr.treatment.capital.cost=50000,
+asr.design.cost=NA,
+asr.design.cost.proportion.of.capital.cost=0.1,
+asr.capital.cost.per.ml=700,
+asr.cost.temp.storage.per.ml=0,
+asr.treatment.capital.cost=NA, #overrides asr.treatment.capital.cost.per.ml
+asr.treatment.capital.cost.per.ml=250,
 asr.treatment.cost.per.ml=150,
-asr.maintenance.rate=0.03,
+asr.maintenance.rate=0.07,
 
 net.environmental.cost=0,
                 breakeven.factor=NA,
@@ -79,31 +85,32 @@ net.environmental.cost=0,
 
 ){
 
+nyears=nyears[[scen]]
  
 ## Between scenarios
 if(scen=="base"){
-  asr.ml=0
+  mar.ml=0
 } else {
- asr.ml=water.available["surface.regular.license.ml"]+water.available["supplementary"] #600
+ mar.ml=water.available["supplementary"] #600
 }
 
-if(is.na(asr.capacity.ml)) asr.capacity.ml <- asr.ml
+if(is.na(asr.capacity.ml)) asr.capacity.ml <- mar.ml
 
 ################################################
 ## Gross margin for dryland and irrigated cropping
 
 ## TODO: cannot be set directly because needs to be kept consistent with sum(water.available)
-total.surface.water=sum(water.available[c("surface.regular.license.ml","supplementary")])
+total.surface.water=sum(water.available["supplementary"])
 
 if(scen=="base") {
  net.water.available=sum(water.available)-surface.evap.rate*total.surface.water
- pump.vol.ml=water.available["groundwater"]
+ pump.vol.ml=0
 } else {
-  net.water.available=sum(water.available)-asr.loss.rate*asr.ml
-  pump.vol.ml=water.available["groundwater"]+(1-asr.loss.rate)*asr.ml
+  net.water.available=sum(water.available)-mar.loss.rate*mar.ml
+  pump.vol.ml=(1-mar.loss.rate)*mar.ml
 }
 
-  land.used.ha=c(cotton=NA,faba.bean=NA,cultivated.dryland=280)
+  land.used.ha=c(cotton=NA,faba.bean=NA,cultivated.dryland=0)
 
 if(any(is.na(gross.margin.per.ml))){##ML/ha calculation
 
@@ -145,7 +152,7 @@ net.farm.income.per.ml=net.farm.income/water.applied.ml
 
 if(scen=="base"){
  farm.dam.cost=farmdam.cost.per.ml*total.surface.water
- capital.cost=farm.dam.cost
+ capital.cost=farm.dam.cost*include.farm.dam.capital.cost
 
  pump.cost=pump.vol.ml*pump.cost.dollar.per.ml ## groundwater pumping
 
@@ -158,7 +165,9 @@ if(scen=="base"){
  cost=annualised.capital.cost(capital.cost,discount.rate,nyears)+ongoing.cost
 } else if(scen=="basin"){
  ## Basin infiltration
-  if(is.na(basin.capital.cost.per.ml))  basin.capital.cost.per.ml=basin.capital.cost.per.ml.at.0.5.m.per.day*0.5/basin.infiltration.rate
+  if(is.na(basin.capital.cost.per.ml))  basin.capital.cost.per.ml=basin.capital.cost.per.ml.at.0.2.m.per.day*0.2/basin.infiltration.rate
+  basin.capital.cost=basin.capital.cost.per.ml*asr.capacity.ml
+  if(is.na(basin.design.cost)) basin.design.cost=basin.capital.cost*basin.design.cost.proportion.of.capital.cost
 
   temporary.storage.cost= basin.cost.temp.storage.per.ml*asr.capacity.ml
 
@@ -166,8 +175,7 @@ if(scen=="base"){
  capital.cost=
    #Design and investigation cost (one time)
   basin.design.cost+
-   #Capital cost  600 ML Recharge (ecl. Temporary storage  and excl. land)
-  basin.capital.cost.per.ml*asr.capacity.ml+
+  basin.capital.cost+
   temporary.storage.cost
 
 ##print(pump.vol.ml*pump.cost.dollar.per.ml) ## groundwater pumping
@@ -186,9 +194,14 @@ if(scen=="base"){
   surface.pump.cost=total.surface.water*capture.pump.cost.dollar.per.ml.mar
 
   temporary.storage.cost= asr.cost.temp.storage.per.ml*asr.capacity.ml
-
-  capital.cost=asr.design.cost+asr.capital.cost.per.ml*asr.capacity.ml+asr.treatment.capital.cost+ temporary.storage.cost
-  ongoing.cost=asr.treatment.cost.per.ml*asr.ml+asr.maintenance.rate*(asr.capital.cost.per.ml*asr.capacity.ml+asr.treatment.capital.cost)+ pump.vol.ml*pump.cost.dollar.per.ml+surface.pump.cost
+  asr.capital.cost=asr.capital.cost.per.ml*asr.capacity.ml
+  if(is.na(asr.treatment.capital.cost)) asr.treatment.capital.cost=asr.treatment.capital.cost.per.ml*asr.capacity.ml
+  if(is.na(asr.design.cost)) asr.design.cost=(asr.capital.cost+asr.treatment.capital.cost)*asr.design.cost.proportion.of.capital.cost
+  
+  capital.cost=asr.design.cost+asr.capital.cost+asr.treatment.capital.cost+ temporary.storage.cost
+  maintenance.cost=asr.maintenance.rate*(asr.capital.cost+asr.treatment.capital.cost)
+  pump.cost=pump.vol.ml*pump.cost.dollar.per.ml
+  ongoing.cost=asr.treatment.cost.per.ml*mar.ml+maintenance.cost+ pump.cost+surface.pump.cost
   cost=annualised.capital.cost(capital.cost,discount.rate,nyears)+ongoing.cost
 } else{
  stop(sprintf("scen '%s' not recognised",scen))
