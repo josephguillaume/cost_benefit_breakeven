@@ -1,4 +1,4 @@
-getRanges<-function(MODEL=NPV){
+getRanges<-function(MODEL=get("NPV",envir=.GlobalEnv)){
     ranges=NULL
     ## Get the default values of the model
     pars=lapply(formals(MODEL),eval)

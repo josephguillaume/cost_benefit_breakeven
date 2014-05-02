@@ -1,5 +1,5 @@
 createFun <-
-function(scen,baseline,ranges,fixed.vals=NULL,MODEL=NPV){
+function(scen,baseline,ranges,fixed.vals=NULL,MODEL=get("NPV",envir=.GlobalEnv)){
   pars <- getDefaultPars(MODEL)
   for(v in ranges$Variable) {
     if(is.null(eval(parse(text=sprintf("pars$%s",v))))) stop(sprintf("Parameter %s not recognised",v))
