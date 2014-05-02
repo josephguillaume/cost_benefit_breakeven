@@ -39,7 +39,7 @@ Setup
     1.	It should have columns: Variable, Modeled,Min,Max
     2.	You can create a template by calling:
 
-            write.csv(getRanges(),"cba_parameter_ranges.csv",row.names=FALSE)
+            write.csv(getRanges(NPV),"cba_parameter_ranges.csv",row.names=FALSE)
 
     3.	Ensure the file only includes the variables of interest
     4.	Ensure the Min and Max values for the analysis make sense
