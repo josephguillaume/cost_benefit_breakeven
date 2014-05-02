@@ -159,9 +159,9 @@ shinyServer(function(input, output, session) {
     limits <- reactive({
         update.ranges()
         ##input$update_ranges
-        df <- data.frame(ranges,
-                         t(sapply(ranges$Variable,function(v) input[[sprintf("more_slider_%s",v)]]))
-                         )
+        user.bounds <- sapply(ranges$Variable,function(v) input[[sprintf("more_slider_%s",v)]])
+        if(!is.matrix(user.bounds)) stop("Error in reading user bounds from sliders")
+        df <- data.frame(ranges,t(user.bounds))
         rownames(df) <- df$Variable
         df
     })
@@ -227,7 +227,11 @@ shinyServer(function(input, output, session) {
       ranges0 <- subset(ranges, Variable == variable)
       basin_base0 <- createFun(input$scen, input$baseline, ranges0)
       g <- ggplot(data=data.frame(x=c(ranges0$Min,ranges0$Max)))+
-          geom_vline(aes(xintercept=x,linetype=type,size=type,colour=type),data=data.frame(x=c(as.numeric(limits()[variable,"Modeled"]),as.numeric(limits()[variable,c("X1","X2")])),type=c("Best guess","Limits","Limits")),show_guide=TRUE)+
+          geom_vline(aes(xintercept=x,linetype=type,size=type,colour=type),
+                     data=data.frame(
+                     x=c(as.numeric(limits()[variable,"Modeled"]),as.numeric(limits()[variable,c("X1","X2")])),
+                     type=c("Best guess","Limits","Limits")),
+                     show_guide=TRUE)+
               geom_hline(aes(yintercept=x,linetype="Equal NPV",size="Equal NPV",colour="Equal NPV"),data=data.frame(x=0))+
                 stat_function(aes(linetype="Difference in NPV",size="Difference in NPV",colour="Difference in NPV"),fun=Vectorize(basin_base0))+
                   scale_linetype_manual(name="Lines",values=c("Limits"="solid","Best guess"="dashed","Equal NPV"="solid","Difference in NPV"="solid"))+
