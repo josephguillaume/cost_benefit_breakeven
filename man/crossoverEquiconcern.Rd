@@ -29,7 +29,7 @@ crossoverEquiconcern(scen, baseline, ranges)
 }
 \value{
   List with elements describing cross-over point identified
-  \item{loc}{Level of concern [0,1]}
+  \item{loc}{Level of concern [0,100]. At loc=0, we are at the bound. At loc=100, we are at the best guess}
   \item{bound}{Named vector of closest bound to cross-over point on each variable}
   \item{dNPV}{Difference in NPV at cross-over point (should be close to
     zero)}
